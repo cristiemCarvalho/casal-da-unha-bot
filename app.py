@@ -422,15 +422,6 @@ try:
 except Exception as error:
     client_error = str(error)
 
-if not client:
-    st.info(
-        "As respostas rápidas continuam disponíveis. Para perguntas abertas, "
-        "configura GOOGLE_API_KEY nos Secrets do Streamlit ou define-a como "
-        "variável de ambiente."
-    )
-    if client_error:
-        st.warning(f"Não foi possível inicializar o Gemini: {client_error}")
-
 for message in st.session_state.messages:
     avatar = avatar_bia if message["role"] == "assistant" else "🌸"
     with st.chat_message(message["role"], avatar=avatar):
@@ -479,11 +470,16 @@ if prompt:
                 {"role": "assistant", "content": resposta_local}
             )
         elif not client or not types:
-            st.error(
-                "Não consigo responder a essa pergunta sem o Gemini. "
-                "As respostas rápidas continuam disponíveis; configura uma "
-                "chave válida para perguntas abertas."
-            )
+            if client_error:
+                st.error("Não consegui inicializar o Gemini para responder.")
+                with st.expander("Detalhes técnicos"):
+                    st.write(client_error)
+            else:
+                st.error(
+                    "Essa pergunta precisa do Gemini. As respostas rápidas "
+                    "continuam disponíveis; configura uma chave de API válida "
+                    "para perguntas abertas."
+                )
         else:
             history = []
             for message in st.session_state.messages:
