@@ -351,20 +351,19 @@ if prompt:
 
             answer = response.text
             if not answer:
-                st.error(
-                    f"O modelo {model_name} não devolveu uma resposta. "
-                    "Tenta enviar de novo, tá? ✨"
-                )
-            else:
-                st.markdown(answer)
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": answer}
-                )
+                model_errors.append(f"{model_name}: resposta sem texto")
+                continue
+
+            st.markdown(answer)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": answer}
+            )
             break
         else:
             st.error(
-                "Não consegui conectar a nenhum dos modelos disponíveis. "
-                "Confere a ligação, a chave e a quota da API e tenta novamente."
+                "Não foi possível obter uma resposta. Pode ser uma instabilidade "
+                "ou um limite temporário de quota; aguarda um minuto e tenta de "
+                "novo. Se continuar, verifica a chave e os detalhes técnicos abaixo."
             )
             with st.expander("Detalhes técnicos"):
                 for model_error in model_errors:
