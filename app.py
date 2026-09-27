@@ -262,6 +262,24 @@ Referências técnicas fornecidas pelo Casal da Unha:
   base, construção, acabamento e selagem. Respeite o protocolo do fabricante.
 - O lixamento técnico exige controle de laterais, ápice, simetria, borda livre,
   arco e espessura, sem comprometer a unha natural.
+- Gel de construção: prepare a unha sem agredir a lâmina, aplique somente as
+  camadas previstas pelo sistema do fabricante, mantenha o produto afastado da
+  pele e faça a cura completa com uma lâmpada compatível. Estruture o ápice e
+  laterais sem excesso de produto; interrompa se houver ardor, irritação ou
+  reação e não use produto não curado sobre a pele.
+- Esmaltação em gel: use produtos compatíveis entre si e com a cabine, aplique
+  camadas finas conforme as instruções do fabricante, sele a borda livre quando
+  indicado e evite contato com pele e cutículas. Não improvise tempos de cura;
+  produto subcurado pode aumentar riscos de sensibilização.
+- Biossegurança: higienize as mãos e a estação, use EPIs adequados, faça a
+  limpeza dos instrumentos antes da esterilização e utilize embalagem e ciclo
+  compatíveis com o material e com as instruções do fabricante da autoclave.
+  Siga o ciclo validado e as exigências da vigilância sanitária local; registre
+  ciclos e monitore indicadores conforme o protocolo aplicável. Não trate
+  desinfecção como sinônimo de esterilização nem reutilize itens descartáveis.
+- Cursos: não invente preços, datas, vagas, certificados ou conteúdo não
+  confirmado. Oriente a consultar o canal oficial do Casal da Unha para a tabela
+  e as condições atualizadas dos cursos presenciais.
 - Os intervalos de manutenção dependem do crescimento, condição e estrutura:
   clientes com unhas roídas, úmidas ou de maior impacto podem precisar de
   avaliação e retorno antes. Não apresente prazo como regra médica universal.
@@ -273,6 +291,44 @@ avaliação de profissional de saúde qualificado.
 """
 
 RESPOSTAS_RAPIDAS_LOCAIS = (
+    (
+        (
+            "preco do curso",
+            "preco dos cursos",
+            "valor do curso",
+            "valor dos cursos",
+            "curso presencial",
+            "cursos presenciais",
+        ),
+        "📚 Os valores, datas e vagas dos cursos podem mudar. Não tenho uma "
+        "tabela atualizada confirmada; consulta o canal oficial do Casal da "
+        "Unha para receber preços e condições corretos.",
+    ),
+    (
+        ("biosseguranca", "autoclave", "esterilizacao", "esterilizar instrumento"),
+        "🧼 **Biossegurança:** primeiro faça a limpeza correta dos instrumentos; "
+        "depois use embalagem e ciclo de autoclave compatíveis com o material, "
+        "seguindo o manual do equipamento e as regras da vigilância sanitária "
+        "local. Registre os ciclos e use os indicadores previstos no protocolo. "
+        "Desinfecção não é o mesmo que esterilização, e itens descartáveis não "
+        "devem ser reutilizados. Não existe um tempo/temperatura único para "
+        "todas as autoclaves e cargas.",
+    ),
+    (
+        ("gel de construcao", "gel construtor", "construcao em gel"),
+        "💅 **Gel de construção:** segue o sistema completo indicado pelo "
+        "fabricante: preparação suave, produtos compatíveis, camadas e cura "
+        "conforme o rótulo e a cabine. Mantenha o gel longe da pele e estruture "
+        "ápice e laterais sem excesso. Não há um tempo de cura universal; "
+        "produto subcurado ou em contato com a pele pode causar sensibilização.",
+    ),
+    (
+        ("esmalte em gel", "esmaltacao em gel", "esmalte gel", "esmaltacao gel"),
+        "✨ **Esmaltação em gel:** use base, cor, top coat e cabine compatíveis. "
+        "Aplique camadas finas, evite tocar pele e cutículas e respeite os tempos "
+        "de cura do fabricante para cada produto e lâmpada. Não tente compensar "
+        "incompatibilidade ou camada grossa aumentando o tempo por conta própria.",
+    ),
     (
         ("manutencao", "manutencoes", "prazo de manutencao", "quando fazer manutencao"),
         "💅 **Manutenção:** como referência informada pelo Casal da Unha, "
