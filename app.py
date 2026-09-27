@@ -4,9 +4,10 @@ import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
 
 st.set_page_config(
-    page_title="Casal da Unha Chatbot",
+    page_title="Casal da Unha Chatbot | Assistente",
     page_icon="💅",
     layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown(
@@ -21,9 +22,13 @@ st.markdown(
     }
 
     .stApp {
-        background: var(--page-background);
+        background: #fafaf8;
         color: var(--chat-ink);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    #MainMenu, footer {
+        visibility: hidden;
     }
 
     .block-container {
@@ -32,19 +37,28 @@ st.markdown(
         padding-bottom: 6rem;
     }
 
-    .main-title {
-        margin: 0 0 4px;
-        color: #c87d87;
-        font-size: 2.2rem;
-        font-weight: 800;
+    .hero-header {
+        margin-bottom: 16px;
+        padding: 16px 14px;
+        border: 1px solid var(--gold);
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1c1c1c 0%, #2d2522 100%);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
         text-align: center;
     }
 
-    .sub-title {
-        margin: 0 0 25px;
-        color: #666;
-        font-size: 1rem;
-        text-align: center;
+    .hero-title {
+        margin: 0 0 4px;
+        color: #f3c5c5;
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    .hero-subtitle {
+        margin: 0;
+        color: #e2c97e;
+        font-size: 0.88rem;
+        font-weight: 500;
     }
 
     .top-status-bar {
@@ -100,34 +114,40 @@ st.markdown(
 
     div.stButton > button {
         width: 100%;
-        padding: 10px 14px;
-        border: none;
-        border-radius: 20px;
-        background: var(--gold);
-        color: #fff;
+        margin-bottom: 4px;
+        padding: 10px 12px;
+        border: 1.5px solid #e8d8ce;
+        border-radius: 12px;
+        background: #fff;
+        color: #4a3b32;
         font-size: 0.88rem;
         font-weight: 600;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-        transition: all 0.25s ease-in-out;
     }
 
-    div.stButton > button:hover {
-        background: #c5a028;
-        color: #fff;
-        transform: scale(1.02);
+    div.stButton > button:hover,
+    div.stButton > button:active {
+        border-color: var(--gold);
+        background: #fdf7f3;
+        color: #4a3b32;
+        transform: scale(0.98);
     }
 
     [data-testid="stSidebar"] {
         background: #f6f1eb;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .block-container {
-            padding: 1rem 0.8rem 5.5rem;
+            padding: 1rem 0.8rem 5rem;
         }
 
-        .main-title {
-            font-size: 1.8rem;
+        .hero-title {
+            font-size: 1.3rem;
+        }
+
+        .hero-subtitle {
+            font-size: 0.8rem;
         }
 
         [data-testid="stChatMessage"] {
@@ -190,9 +210,14 @@ if os.path.exists(logo_path):
         st.warning(f"Não foi possível carregar o logótipo: {error}")
 
 st.markdown(
-    '<h1 class="main-title">💅 Casal da Unha</h1>'
-    '<p class="sub-title">Tua assistente inteligente de precificação e gestão '
-    'no Casal da Unha ✨</p>',
+    """
+    <div class="hero-header">
+        <div class="hero-title">✨ Chatbot Casal da Unha</div>
+        <div class="hero-subtitle">
+            Tua amiga das finanças, da mesa e da agenda cheia 24h 💅💎
+        </div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -307,7 +332,11 @@ if prompt:
             system_instruction=PROMPT_SISTEMA_BIA,
             temperature=0.7,
         )
-        models = ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-2.5-flash")
+        models = (
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-1.5-flash",
+        )
         model_errors = []
 
         for model_name in models:
