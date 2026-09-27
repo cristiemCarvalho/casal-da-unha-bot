@@ -1,4 +1,6 @@
 import os
+import re
+import unicodedata
 
 import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
@@ -95,6 +97,12 @@ st.markdown(
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
 
+    [data-testid="stChatMessage"],
+    [data-testid="stChatMessage"] p,
+    [data-testid="stChatMessageContent"] {
+        color: #31333f !important;
+    }
+
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
         margin-left: auto;
         border-color: #f0ceca;
@@ -135,6 +143,12 @@ st.markdown(
 
     [data-testid="stSidebar"] {
         background: #f6f1eb;
+    }
+
+    [data-testid="stSidebar"],
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span {
+        color: #31333f !important;
     }
 
     @media (max-width: 768px) {
@@ -222,24 +236,105 @@ st.markdown(
 )
 
 PROMPT_SISTEMA_BIA = """
-Você é a assistente virtual do Casal da Unha. Fale com a nail designer como
-uma amiga próxima, carinhosa e experiente: alegre, motivadora, espontânea e
-bem-humorada, com brincadeiras leves e respeitosas. Seja firme quando precisar
-lembrar que trabalho profissional não é favor e não deve dar prejuízo.
+Você é a assistente virtual do Casal da Unha, com uma voz calorosa, alegre,
+motivadora, empática e bem-humorada. Seja firme com carinho quando lembrar que
+trabalho profissional não é favor e não deve dar prejuízo. Apresente-se como
+assistente virtual; não afirme ser a pessoa real Bia Putinatti ou outra pessoa.
 
-Você é uma assistente virtual, não uma pessoa real, a Instrutora Bia Putinatti
-ou a esposa de alguém. Não afirme ser nenhuma dessas pessoas.
+Ajude nail designers com precificação, custos de materiais e tempo de mesa,
+cuidados gerais com unhas, técnicas de alongamento, organização do studio,
+atração de clientes e gestão da agenda. Use português brasileiro natural,
+respostas fáceis de ler no celular e emojis com moderação. Explique cálculos
+passo a passo em reais (R$), pergunte os dados que faltarem e não invente fatos.
 
-Ajude nail designers, iniciantes ou experientes, a:
-- precificar serviços considerando materiais, tempo de mesa, custos fixos e lucro;
-- valorizar o próprio trabalho e cobrar com confiança;
-- atrair e fidelizar clientes, organizar a agenda e gerir o studio.
+Referências técnicas fornecidas pelo Casal da Unha:
+- Anatomia: lâmina e leito ungueal, matriz, lúnula, eponíquio, hiponíquio e
+  pregas/sulcos laterais e proximais. Não confunda a cutícula solta com o
+  eponíquio, que protege a região proximal.
+- Na remoção, preserve a unha natural e não lixe até remover toda a placa ou
+  causar dor, calor excessivo ou afinamento.
+- Materiais incluem cabine UV/LED apropriada ao produto, micromotor, coletor de
+  pó, iluminação e ferramentas adequadas. Siga sempre as instruções do fabricante
+  para preparação, aplicação e tempo de cura; não presuma que um tempo único
+  sirva para todos os produtos e equipamentos.
+- Uma sequência geral de preparação e aplicação pode incluir higienização,
+  preparação suave da lâmina, desidratação/primer quando indicados pelo sistema,
+  base, construção, acabamento e selagem. Respeite o protocolo do fabricante.
+- O lixamento técnico exige controle de laterais, ápice, simetria, borda livre,
+  arco e espessura, sem comprometer a unha natural.
+- Os intervalos de manutenção dependem do crescimento, condição e estrutura:
+  clientes com unhas roídas, úmidas ou de maior impacto podem precisar de
+  avaliação e retorno antes. Não apresente prazo como regra médica universal.
 
-Use português brasileiro natural, frases fáceis de ler no celular e emojis com
-moderação. Seja didática e direta: explique os cálculos por etapas e use reais
-(R$) nos exemplos. Pergunte pelos dados que faltarem em vez de inventar valores;
-explique as hipóteses de qualquer estimativa e não prometa resultados garantidos.
+Não diagnostique doenças nem recomende tratar alterações suspeitas com produto
+ou procedimento estético. Se houver dor, inflamação, descolamento, mudança de
+cor ou suspeita de infecção/alergia, oriente interromper o procedimento e buscar
+avaliação de profissional de saúde qualificado.
 """
+
+RESPOSTAS_RAPIDAS_LOCAIS = (
+    (
+        ("manutencao", "manutencoes", "prazo de manutencao", "quando fazer manutencao"),
+        "💅 **Manutenção:** como referência informada pelo Casal da Unha, "
+        "o retorno costuma ser avaliado entre 15 e 21 dias; em unhas roídas, "
+        "úmidas ou de maior impacto, pode ser necessário reavaliar entre 7 e "
+        "14 dias. O intervalo depende da condição da unha, do produto e da "
+        "avaliação profissional. Se houver dor ou alteração suspeita, não "
+        "faça cobertura estética: procure avaliação de saúde.",
+    ),
+    (
+        ("preco", "precos", "valor", "valores", "quanto cobrar"),
+        "💰 Para consultar a tabela atualizada de atendimentos e cursos do "
+        "Casal da Unha, envia uma mensagem diretamente pelo WhatsApp oficial. "
+        "Para calcular o preço do teu próprio serviço, também posso te ajudar "
+        "a levantar material, tempo de mesa, custos fixos e lucro.",
+    ),
+    (
+        ("horario", "horarios", "que horas atende", "horario de atendimento"),
+        "⏰ O horário informado pelo Casal da Unha é de segunda a sábado, "
+        "das 08h às 19h, com agendamento prévio. Confirma a disponibilidade "
+        "pelo canal oficial antes de se deslocar.",
+    ),
+    (
+        ("pincel", "pinceis"),
+        "🖌️ **Pincéis:** a referência do Casal da Unha indica o língua de "
+        "gato de 8 mm para gel base e o chanfrado de 7 mm para gel construtor. "
+        "A escolha também depende da viscosidade do produto e da técnica.",
+    ),
+    (
+        ("broca", "brocas", "anel de corte"),
+        "💎 **Anéis de corte das brocas — referência geral:**\n"
+        "- Amarelo: extra fina\n- Vermelho: fina\n- Azul: média\n"
+        "- Verde: grossa\n- Preto: extra grossa\n\n"
+        "A abrasividade varia conforme a broca. Escolhe a ferramenta e a "
+        "pressão conforme a área e a formação profissional; evita trabalhar "
+        "sobre a unha natural de forma agressiva.",
+    ),
+)
+
+
+def normalizar_texto(texto):
+    texto_sem_acentos = unicodedata.normalize("NFKD", texto)
+    return "".join(
+        caractere
+        for caractere in texto_sem_acentos
+        if not unicodedata.combining(caractere)
+    ).casefold()
+
+
+def consultar_resposta_local(texto):
+    texto_normalizado = " ".join(
+        re.findall(r"\w+", normalizar_texto(texto), flags=re.UNICODE)
+    )
+    palavras = set(texto_normalizado.split())
+    for termos, resposta in RESPOSTAS_RAPIDAS_LOCAIS:
+        if any(
+            termo in palavras or f" {termo} " in f" {texto_normalizado} "
+            for termo in termos
+        ):
+            return resposta
+    return None
+
 
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
@@ -247,32 +342,38 @@ except (KeyError, StreamlitSecretNotFoundError):
     api_key = None
 except Exception as error:
     st.error(f"Não foi possível ler os Secrets do Streamlit: {error}")
-    st.stop()
+    api_key = None
 
 if not api_key:
     api_key = os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    api_key = os.getenv("GEMINI_API_KEY")
 
 if isinstance(api_key, str):
     api_key = api_key.strip()
 else:
     api_key = None
 
-if not api_key:
-    st.error("⚠️ A chave GOOGLE_API_KEY não foi configurada.")
-    st.info(
-        "Adiciona GOOGLE_API_KEY aos Secrets do Streamlit Cloud ou define-a "
-        "como variável de ambiente."
-    )
-    st.stop()
-
+client = None
+client_error = None
+types = None
 try:
-    from google import genai
-    from google.genai import types
+    if api_key:
+        from google import genai
+        from google.genai import types
 
-    client = genai.Client(api_key=api_key)
+        client = genai.Client(api_key=api_key)
 except Exception as error:
-    st.error(f"Não foi possível inicializar o cliente Gemini: {error}")
-    st.stop()
+    client_error = str(error)
+
+if not client:
+    st.info(
+        "As respostas rápidas continuam disponíveis. Para perguntas abertas, "
+        "configura GOOGLE_API_KEY nos Secrets do Streamlit ou define-a como "
+        "variável de ambiente."
+    )
+    if client_error:
+        st.warning(f"Não foi possível inicializar o Gemini: {client_error}")
 
 for message in st.session_state.messages:
     avatar = avatar_bia if message["role"] == "assistant" else "🌸"
@@ -315,56 +416,72 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar=avatar_bia):
-        history = []
-        for message in st.session_state.messages:
-            if message.get("is_welcome"):
-                continue
-            role = "model" if message["role"] == "assistant" else "user"
-            if history and history[-1]["role"] == role:
-                history[-1]["parts"].append({"text": message["content"]})
-            else:
-                history.append({"role": role, "parts": [{"text": message["content"]}]})
-        history = history[-20:]
-        if history and history[0]["role"] == "model":
-            history = history[1:]
-
-        config = types.GenerateContentConfig(
-            system_instruction=PROMPT_SISTEMA_BIA,
-            temperature=0.7,
-        )
-        models = (
-            "gemini-3.8-flash",
-            "gemini-2.5-flash",
-        )
-        model_errors = []
-
-        for model_name in models:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=history,
-                    config=config,
-                )
-            except Exception as error:
-                model_errors.append(f"{model_name}: {error}")
-                continue
-
-            answer = response.text
-            if not answer:
-                model_errors.append(f"{model_name}: resposta sem texto")
-                continue
-
-            st.markdown(answer)
+        resposta_local = consultar_resposta_local(prompt)
+        if resposta_local:
+            st.markdown(resposta_local)
             st.session_state.messages.append(
-                {"role": "assistant", "content": answer}
+                {"role": "assistant", "content": resposta_local}
             )
-            break
-        else:
+        elif not client or not types:
             st.error(
-                "Não foi possível obter uma resposta. Pode ser uma instabilidade "
-                "ou um limite temporário de quota; aguarda um minuto e tenta de "
-                "novo. Se continuar, verifica a chave e os detalhes técnicos abaixo."
+                "Não consigo responder a essa pergunta sem o Gemini. "
+                "As respostas rápidas continuam disponíveis; configura uma "
+                "chave válida para perguntas abertas."
             )
-            with st.expander("Detalhes técnicos"):
-                for model_error in model_errors:
-                    st.write(model_error)
+        else:
+            history = []
+            for message in st.session_state.messages:
+                if message.get("is_welcome"):
+                    continue
+                role = "model" if message["role"] == "assistant" else "user"
+                if history and history[-1]["role"] == role:
+                    history[-1]["parts"].append({"text": message["content"]})
+                else:
+                    history.append(
+                        {"role": role, "parts": [{"text": message["content"]}]}
+                    )
+            history = history[-20:]
+            if history and history[0]["role"] == "model":
+                history = history[1:]
+
+            config = types.GenerateContentConfig(
+                system_instruction=PROMPT_SISTEMA_BIA,
+                temperature=0.7,
+            )
+            models = (
+                "gemini-3.8-flash",
+                "gemini-2.5-flash",
+            )
+            model_errors = []
+
+            for model_name in models:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=history,
+                        config=config,
+                    )
+                except Exception as error:
+                    model_errors.append(f"{model_name}: {error}")
+                    continue
+
+                answer = response.text if response else None
+                if not answer:
+                    model_errors.append(f"{model_name}: resposta sem texto")
+                    continue
+
+                st.markdown(answer)
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": answer}
+                )
+                break
+            else:
+                st.error(
+                    "Não foi possível obter uma resposta. Pode ser uma "
+                    "instabilidade ou um limite temporário de quota; aguarda "
+                    "um minuto e tenta de novo. Se continuar, verifica a chave "
+                    "e os detalhes técnicos abaixo."
+                )
+                with st.expander("Detalhes técnicos"):
+                    for model_error in model_errors:
+                        st.write(model_error)
