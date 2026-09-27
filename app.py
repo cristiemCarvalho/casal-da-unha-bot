@@ -47,6 +47,30 @@ st.markdown(
         text-align: center;
     }
 
+    .top-status-bar {
+        display: flex;
+        width: fit-content;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 0 auto 15px;
+        padding: 6px 16px;
+        border-radius: 20px;
+        background: #f4eeea;
+        color: #4a4a4a;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #2ecc71;
+        box-shadow: 0 0 8px #2ecc71;
+    }
+
     [data-testid="stChatMessage"] {
         max-width: 88%;
         margin-bottom: 14px;
@@ -115,6 +139,25 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+project_dir = os.path.dirname(os.path.abspath(__file__))
+avatar_jpg = os.path.join(project_dir, "bia.jpg")
+avatar_png = os.path.join(project_dir, "bia.png")
+if os.path.exists(avatar_jpg):
+    avatar_bia = avatar_jpg
+elif os.path.exists(avatar_png):
+    avatar_bia = avatar_png
+else:
+    avatar_bia = "💅"
+
+st.markdown(
+    """
+    <div class="top-status-bar">
+        <span class="status-dot"></span>
+        Assistente virtual do Casal da Unha · online
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 WELCOME_MESSAGE = (
     "Oii, maravilhosa! ✨ Seja muito bem-vinda ao **Casal da Unha**! 💅\n\n"
     "Tô aqui pra te ajudar a valorizar teu trabalho em mesa, organizar os "
@@ -207,7 +250,7 @@ except Exception as error:
     st.stop()
 
 for message in st.session_state.messages:
-    avatar = "💅" if message["role"] == "assistant" else "🌸"
+    avatar = avatar_bia if message["role"] == "assistant" else "🌸"
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
@@ -246,7 +289,7 @@ if prompt:
     with st.chat_message("user", avatar="🌸"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant", avatar="💅"):
+    with st.chat_message("assistant", avatar=avatar_bia):
         history = []
         for message in st.session_state.messages:
             if message.get("is_welcome"):
