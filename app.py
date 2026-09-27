@@ -206,7 +206,7 @@ if "messages" not in st.session_state:
 with st.sidebar:
     st.markdown("### 💅 Casal da Unha")
     st.caption("Um cantinho para cuidar dos números e fazer a agenda florescer.")
-    if st.button("＋ Nova conversa", use_container_width=True):
+    if st.button("＋ Nova conversa", width="stretch"):
         st.session_state.messages = [
             {"role": "assistant", "content": WELCOME_MESSAGE, "is_welcome": True}
         ]
@@ -219,7 +219,7 @@ if os.path.exists(logo_path):
     try:
         logo_columns = st.columns([1, 1.8, 1])
         with logo_columns[1]:
-            st.image(logo_path, use_container_width=True)
+            st.image(logo_path, width="stretch")
     except Exception as error:
         st.warning(f"Não foi possível carregar o logótipo: {error}")
 
@@ -228,7 +228,7 @@ st.markdown(
     <div class="hero-header">
         <div class="hero-title">✨ Chatbot Casal da Unha</div>
         <div class="hero-subtitle">
-            Tua amiga das finanças, da mesa e da agenda cheia 24h 💅💎
+            Tua amiga das finanças, da mesa e da agenda cheia 💅💎
         </div>
     </div>
     """,
@@ -393,7 +393,7 @@ def consultar_resposta_local(texto):
 
 
 try:
-    api_key = st.secrets["GOOGLE_API_KEY"]
+    api_key = st.secrets["GROQ_API_KEY"]
 except (KeyError, StreamlitSecretNotFoundError):
     api_key = None
 except Exception as error:
@@ -401,9 +401,7 @@ except Exception as error:
     api_key = None
 
 if not api_key:
-    api_key = os.getenv("GOOGLE_API_KEY")
-if not api_key:
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
 
 if isinstance(api_key, str):
     api_key = api_key.strip()
@@ -412,13 +410,11 @@ else:
 
 client = None
 client_error = None
-types = None
 try:
     if api_key:
-        from google import genai
-        from google.genai import types
+        from groq import Groq
 
-        client = genai.Client(api_key=api_key)
+        client = Groq(api_key=api_key)
 except Exception as error:
     client_error = str(error)
 
@@ -469,14 +465,14 @@ if prompt:
             st.session_state.messages.append(
                 {"role": "assistant", "content": resposta_local}
             )
-        elif not client or not types:
+        elif not client:
             if client_error:
-                st.error("Não consegui inicializar o Gemini para responder.")
+                st.error("Não consegui inicializar a assistente de IA.")
                 with st.expander("Detalhes técnicos"):
                     st.write(client_error)
             else:
                 st.error(
-                    "Essa pergunta precisa do Gemini. As respostas rápidas "
+                    "Essa pergunta precisa da assistente de IA. As respostas rápidas "
                     "continuam disponíveis; configura uma chave de API válida "
                     "para perguntas abertas."
                 )
@@ -485,7 +481,7 @@ if prompt:
             for message in st.session_state.messages:
                 if message.get("is_welcome"):
                     continue
-                role = "model" if message["role"] == "assistant" else "user"
+                role = "assistant" if message["role"] == "assistant" else "user"
                 if history and history[-1]["role"] == role:
                     history[-1]["parts"].append({"text": message["content"]})
                 else:
@@ -493,31 +489,45 @@ if prompt:
                         {"role": role, "parts": [{"text": message["content"]}]}
                     )
             history = history[-20:]
-            if history and history[0]["role"] == "model":
+            if history and history[0]["role"] == "assistant":
                 history = history[1:]
 
-            config = types.GenerateContentConfig(
-                system_instruction=PROMPT_SISTEMA_BIA,
-                temperature=0.7,
-            )
-            models = (
-                "gemini-3.8-flash",
-                "gemini-2.5-flash",
+            preferred_models = (
+                "openai/gpt-oss-120b",
+                "openai/gpt-oss-20b",
+                "llama-3.3-70b-versatile",
+                "llama-3.1-8b-instant",
             )
             model_errors = []
 
-            for model_name in models:
+            for model_name in preferred_models:
                 try:
-                    response = client.models.generate_content(
+                    response = client.chat.completions.create(
                         model=model_name,
-                        contents=history,
-                        config=config,
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": PROMPT_SISTEMA_BIA,
+                            },
+                            *[
+                                {
+                                    "role": message["role"],
+                                    "content": " ".join(
+                                        part["text"] for part in message["parts"]
+                                    ),
+                                }
+                                for message in history
+                            ],
+                        ],
+                        temperature=0.7,
                     )
                 except Exception as error:
                     model_errors.append(f"{model_name}: {error}")
                     continue
 
-                answer = response.text if response else None
+                answer = None
+                if response and response.choices:
+                    answer = response.choices[0].message.content
                 if not answer:
                     model_errors.append(f"{model_name}: resposta sem texto")
                     continue

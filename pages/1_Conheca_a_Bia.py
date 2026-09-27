@@ -70,7 +70,7 @@ if os.path.exists(logo_path):
     try:
         logo_columns = st.columns([1, 1.5, 1])
         with logo_columns[1]:
-            st.image(logo_path, use_container_width=True)
+            st.image(logo_path, width="stretch")
     except Exception as error:
         st.warning(f"Não foi possível carregar o logótipo: {error}")
 
@@ -88,11 +88,10 @@ st.markdown(
 )
 
 st.write("")
-st.page_link(
-    "app.py",
-    label="💬 Conversar com a assistente",
-    icon="💅",
-    use_container_width=True,
+st.link_button(
+    "💬 Conversar com a assistente",
+    "/",
+    width="stretch",
 )
 st.caption(
     "Podes abrir o chat quando quiseres. As respostas com inteligência "
