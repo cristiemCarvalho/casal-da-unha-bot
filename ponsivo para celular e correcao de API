@@ -1,0 +1,17 @@
+[1mdiff --git a/app.py b/app.py[m
+[1mindex 9085397..efd2665 100644[m
+[1m--- a/app.py[m
+[1m+++ b/app.py[m
+[36m@@ -307,7 +307,11 @@[m [mif prompt:[m
+             system_instruction=PROMPT_SISTEMA_BIA,[m
+             temperature=0.7,[m
+         )[m
+[31m-        models = ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-2.5-flash")[m
+[32m+[m[32m        models = ([m
+[32m+[m[32m            "gemini-2.5-flash",[m
+[32m+[m[32m            "gemini-2.0-flash",[m
+[32m+[m[32m            "gemini-1.5-flash",[m
+[32m+[m[32m        )[m
+         model_errors = [][m
+ [m
+         for model_name in models:[m
