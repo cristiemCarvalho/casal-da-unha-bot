@@ -4,7 +4,7 @@ import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
 
 st.set_page_config(
-    page_title="Casal da Unha | NailPrecifica",
+    page_title="Casal da Unha Chatbot",
     page_icon="💅",
     layout="centered",
 )
@@ -13,15 +13,17 @@ st.markdown(
     """
     <style>
     :root {
-        --chat-green: #075e54;
-        --chat-green-light: #d9fdd3;
-        --chat-background: #efeae2;
-        --chat-ink: #25332f;
+        --page-background: #fafafa;
+        --chat-pink: #e8a7a1;
+        --chat-pink-light: #fff1ef;
+        --chat-ink: #302b28;
+        --gold: #d4af37;
     }
 
     .stApp {
-        background: var(--chat-background);
+        background: var(--page-background);
         color: var(--chat-ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .block-container {
@@ -30,79 +32,78 @@ st.markdown(
         padding-bottom: 6rem;
     }
 
-    .chat-header {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        margin-bottom: 1.25rem;
-        padding: 16px 20px;
-        border-radius: 18px;
-        background: var(--chat-green);
-        color: #fff;
-        box-shadow: 0 4px 14px rgba(27, 54, 47, 0.12);
+    .main-title {
+        margin: 0 0 4px;
+        color: #c87d87;
+        font-size: 2.2rem;
+        font-weight: 800;
+        text-align: center;
     }
 
-    .chat-header__avatar {
-        display: grid;
-        width: 48px;
-        height: 48px;
-        flex: 0 0 48px;
-        place-items: center;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.16);
-        font-size: 1.55rem;
-    }
-
-    .chat-header__title {
-        margin: 0;
-        color: #fff;
-        font-size: 1.18rem;
-        font-weight: 700;
-    }
-
-    .chat-header__status {
-        margin: 3px 0 0;
-        color: #d6eee9;
-        font-size: 0.88rem;
+    .sub-title {
+        margin: 0 0 25px;
+        color: #666;
+        font-size: 1rem;
+        text-align: center;
     }
 
     [data-testid="stChatMessage"] {
         max-width: 88%;
-        margin-bottom: 12px;
-        padding: 12px 16px;
-        border: 1px solid #e7e1d7;
-        border-radius: 17px;
+        margin-bottom: 14px;
+        padding: 14px 18px;
+        border: 1px solid #f0e6e6;
+        border-radius: 16px;
         background: #fff;
-        box-shadow: 0 2px 7px rgba(42, 54, 48, 0.06);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
 
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
         margin-left: auto;
-        border-color: #c6e8bd;
-        background: var(--chat-green-light);
+        border-color: #f0ceca;
+        background: var(--chat-pink-light);
     }
 
     [data-testid="stChatInput"] {
-        border-color: #c7d8cf;
-        border-radius: 18px;
+        border: 1px solid var(--chat-pink);
+        border-radius: 20px;
         background: #fff;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     }
 
     [data-testid="stChatInput"] textarea {
         background: transparent;
     }
 
-    [data-testid="stChatInput"] button {
-        color: var(--chat-green);
+    div.stButton > button {
+        width: 100%;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 20px;
+        background: var(--gold);
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: all 0.25s ease-in-out;
+    }
+
+    div.stButton > button:hover {
+        background: #c5a028;
+        color: #fff;
+        transform: scale(1.02);
     }
 
     [data-testid="stSidebar"] {
-        background: #f8f5ef;
+        background: #f6f1eb;
     }
 
     @media (max-width: 640px) {
         .block-container {
             padding: 1rem 0.8rem 5.5rem;
+        }
+
+        .main-title {
+            font-size: 1.8rem;
         }
 
         [data-testid="stChatMessage"] {
@@ -115,9 +116,9 @@ st.markdown(
 )
 
 WELCOME_MESSAGE = (
-    "Oii, maravilhosa! ✨ Que bom te ver por aqui. Vamos cuidar dos números "
-    "do teu negócio e fazer essa agenda brilhar? Me conta: no que posso te "
-    "dar uma mão hoje? 💅"
+    "Oii, maravilhosa! ✨ Seja muito bem-vinda ao **Casal da Unha**! 💅\n\n"
+    "Tô aqui pra te ajudar a valorizar teu trabalho em mesa, organizar os "
+    "lucros e fazer essa agenda florescer. Me conta: por onde começamos? 💖"
 )
 
 if "messages" not in st.session_state:
@@ -134,47 +135,42 @@ with st.sidebar:
         ]
         st.rerun()
     st.divider()
-    st.caption("Dica de amiga: preço justo também é autocuidado com o teu negócio. ✨")
+    st.caption("Dica de amiga: preço justo também é autocuidado com teu negócio. ✨")
 
 logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.png")
 if os.path.exists(logo_path):
     try:
-        st.image(logo_path, width=140)
+        logo_columns = st.columns([1, 1.8, 1])
+        with logo_columns[1]:
+            st.image(logo_path, use_container_width=True)
     except Exception as error:
         st.warning(f"Não foi possível carregar o logótipo: {error}")
 
 st.markdown(
-    """
-    <div class="chat-header">
-        <div class="chat-header__avatar">💅</div>
-        <div>
-            <p class="chat-header__title">NailPrecifica</p>
-            <p class="chat-header__status">Assistente do Casal da Unha · pronta pra conversar ✨</p>
-        </div>
-    </div>
-    """,
+    '<h1 class="main-title">💅 Casal da Unha</h1>'
+    '<p class="sub-title">Tua assistente inteligente de precificação e gestão '
+    'no Casal da Unha ✨</p>',
     unsafe_allow_html=True,
 )
 
 PROMPT_SISTEMA_BIA = """
-Você é a assistente virtual do Casal da Unha, com uma voz próxima e acolhedora,
-inspirada numa parceira carinhosa que conversa com a nail designer no dia a dia.
-Apresente-se como assistente virtual; não afirme ser uma pessoa real, a Instrutora
-Bia ou a esposa de alguém.
+Você é a assistente virtual do Casal da Unha. Fale com a nail designer como
+uma amiga próxima, carinhosa e experiente: alegre, motivadora, espontânea e
+bem-humorada, com brincadeiras leves e respeitosas. Seja firme quando precisar
+lembrar que trabalho profissional não é favor e não deve dar prejuízo.
 
-Seu objetivo é ajudar nail designers a:
-- calcular preços considerando materiais, tempo de mesa, custos fixos e lucro;
+Você é uma assistente virtual, não uma pessoa real, a Instrutora Bia Putinatti
+ou a esposa de alguém. Não afirme ser nenhuma dessas pessoas.
+
+Ajude nail designers, iniciantes ou experientes, a:
+- precificar serviços considerando materiais, tempo de mesa, custos fixos e lucro;
 - valorizar o próprio trabalho e cobrar com confiança;
-- organizar o studio, atrair clientes e fidelizar quem já está na agenda.
+- atrair e fidelizar clientes, organizar a agenda e gerir o studio.
 
-Personalidade: alegre, calorosa, motivadora e espontânea, com brincadeiras leves
-e respeitosas. Seja carinhosa sem exagerar, e firme quando precisar lembrar que
-trabalho profissional não é favor nem deve dar prejuízo. Use português brasileiro
-natural, frases fáceis de ler no celular e emojis com moderação.
-
-Ao ajudar com precificação, explique as contas de forma clara. Pergunte pelos
-dados que faltarem em vez de inventar valores. Deixe explícitas as hipóteses de
-qualquer estimativa e não prometa resultados garantidos para o negócio.
+Use português brasileiro natural, frases fáceis de ler no celular e emojis com
+moderação. Seja didática e direta: explique os cálculos por etapas e use reais
+(R$) nos exemplos. Pergunte pelos dados que faltarem em vez de inventar valores;
+explique as hipóteses de qualquer estimativa e não prometa resultados garantidos.
 """
 
 try:
@@ -215,22 +211,35 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-quick_prompt = None
+suggested_prompt = None
 if len(st.session_state.messages) == 1:
-    st.markdown("**Por onde a gente começa?**")
-    prompt_columns = st.columns(3)
-    quick_prompts = (
-        "💰 Quero calcular o preço de um serviço",
-        "📊 Me ajuda a organizar meus custos",
-        "✨ Como posso atrair mais clientes?",
+    st.markdown("**💡 Dúvidas frequentes — escolhe uma pra gente começar:**")
+    suggestion_columns = st.columns(2)
+    suggestions = (
+        (
+            "📊 Como calcular preço do gel ou fibra?",
+            "Me ajuda a calcular do zero quanto cobrar no alongamento em gel ou fibra?",
+        ),
+        (
+            "💬 O que falar quando pedem desconto?",
+            "Como responder com carinho e firmeza quando uma cliente pede desconto?",
+        ),
+        (
+            "📅 Como atrair mais clientes?",
+            "Quais estratégias práticas ajudam uma nail designer a atrair e fidelizar clientes?",
+        ),
+        (
+            "💎 Quanto cobrar na manutenção?",
+            "Quais custos e critérios devo considerar para calcular o preço da manutenção?",
+        ),
     )
-    for column, suggestion in zip(prompt_columns, quick_prompts):
-        with column:
-            if st.button(suggestion, use_container_width=True):
-                quick_prompt = suggestion.split(" ", 1)[1]
+    for index, (label, question) in enumerate(suggestions):
+        with suggestion_columns[index % 2]:
+            if st.button(label, key=f"suggestion_{index}"):
+                suggested_prompt = question
 
-submitted_prompt = st.chat_input("Escreve aqui... vamos resolver juntas 💬")
-prompt = submitted_prompt or quick_prompt
+typed_prompt = st.chat_input("Escreve aqui tua dúvida... vamos resolver juntas 💬")
+prompt = typed_prompt or suggested_prompt
 
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -238,41 +247,54 @@ if prompt:
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="💅"):
-        try:
-            history = []
-            for message in st.session_state.messages:
-                if message.get("is_welcome"):
-                    continue
-                role = "model" if message["role"] == "assistant" else "user"
-                if history and history[-1]["role"] == role:
-                    history[-1]["parts"].append({"text": message["content"]})
-                else:
-                    history.append(
-                        {"role": role, "parts": [{"text": message["content"]}]}
-                    )
-            history = history[-20:]
-            if history and history[0]["role"] == "model":
-                history = history[1:]
+        history = []
+        for message in st.session_state.messages:
+            if message.get("is_welcome"):
+                continue
+            role = "model" if message["role"] == "assistant" else "user"
+            if history and history[-1]["role"] == role:
+                history[-1]["parts"].append({"text": message["content"]})
+            else:
+                history.append({"role": role, "parts": [{"text": message["content"]}]})
+        history = history[-20:]
+        if history and history[0]["role"] == "model":
+            history = history[1:]
 
-            response = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents=history,
-                config=types.GenerateContentConfig(
-                    system_instruction=PROMPT_SISTEMA_BIA,
-                    temperature=0.7,
-                ),
-            )
+        config = types.GenerateContentConfig(
+            system_instruction=PROMPT_SISTEMA_BIA,
+            temperature=0.7,
+        )
+        models = ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-2.5-flash")
+        model_errors = []
+
+        for model_name in models:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=history,
+                    config=config,
+                )
+            except Exception as error:
+                model_errors.append(f"{model_name}: {error}")
+                continue
+
             answer = response.text
             if not answer:
-                st.error("Não veio uma resposta desta vez. Tenta de novo, tá? ✨")
+                st.error(
+                    f"O modelo {model_name} não devolveu uma resposta. "
+                    "Tenta enviar de novo, tá? ✨"
+                )
             else:
                 st.markdown(answer)
                 st.session_state.messages.append(
                     {"role": "assistant", "content": answer}
                 )
-        except Exception as error:
+            break
+        else:
             st.error(
-                "Não consegui buscar a resposta agora. Confere a ligação, "
-                "a chave e a quota da API e tenta novamente. "
-                f"Detalhes: {error}"
+                "Não consegui conectar a nenhum dos modelos disponíveis. "
+                "Confere a ligação, a chave e a quota da API e tenta novamente."
             )
+            with st.expander("Detalhes técnicos"):
+                for model_error in model_errors:
+                    st.write(model_error)
